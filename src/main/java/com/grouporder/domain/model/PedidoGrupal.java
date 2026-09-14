@@ -1,5 +1,7 @@
 package com.grouporder.domain.model;
 
+import java.util.Objects;
+
 public class PedidoGrupal {
 
     private Long id;
@@ -8,10 +10,17 @@ public class PedidoGrupal {
     private String creador;
 
     public PedidoGrupal(Long id, String codigo, String creador) {
-        this.id = id;
-        this.codigo = codigo;
-        this.creador = creador;
+        this.id = Objects.requireNonNull(id, "El id del pedido es obligatorio");
+        this.codigo = validarTexto(codigo, "El codigo del pedido es obligatorio");
+        this.creador = validarTexto(creador, "El creador del pedido es obligatorio");
         this.estado = EstadoPedido.ABIERTO;
+    }
+
+    private String validarTexto(String valor, String mensajeError) {
+        if (valor == null || valor.isBlank()) {
+            throw new IllegalArgumentException(mensajeError);
+        }
+        return valor.trim();
     }
 
     public String getCodigo() {
