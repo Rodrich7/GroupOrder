@@ -1,5 +1,9 @@
 package com.grouporder;
 
+import com.grouporder.application.usecase.CancelarPedidoGrupal;
+import com.grouporder.application.usecase.CerrarPedidoGrupal;
+import com.grouporder.application.usecase.ConfirmarPedidoGrupal;
+import com.grouporder.application.usecase.EntregarPedidoGrupal;
 import com.grouporder.domain.model.EstadoPedido;
 import com.grouporder.domain.model.PedidoGrupal;
 import org.junit.jupiter.api.Test;
@@ -28,6 +32,34 @@ class GrouporderApplicationTests {
 	void rechazaPedidoSinCodigo() {
 		assertThrows(IllegalArgumentException.class,
 				() -> new PedidoGrupal(1L, "   ", "Ana"));
+	}
+
+	@Test
+	void completaElCicloDeVidaDelPedido() {
+		PedidoGrupal pedido = new PedidoGrupal(1L, "PED-001", "Ana");
+
+		new CerrarPedidoGrupal().ejecutar(pedido);
+		new ConfirmarPedidoGrupal().ejecutar(pedido);
+		new EntregarPedidoGrupal().ejecutar(pedido);
+
+		assertEquals(EstadoPedido.ENTREGADO, pedido.getEstado());
+	}
+
+	@Test
+	void cancelaUnPedidoAbierto() {
+		PedidoGrupal pedido = new PedidoGrupal(2L, "PED-002", "Luis");
+
+		new CancelarPedidoGrupal().ejecutar(pedido);
+
+		assertEquals(EstadoPedido.CANCELADO, pedido.getEstado());
+	}
+
+	@Test
+	void noPermiteConfirmarUnPedidoAbierto() {
+		PedidoGrupal pedido = new PedidoGrupal(3L, "PED-003", "Marta");
+
+		assertThrows(IllegalStateException.class,
+				() -> new ConfirmarPedidoGrupal().ejecutar(pedido));
 	}
 
 }
