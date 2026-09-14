@@ -6,6 +6,10 @@ import com.grouporder.application.usecase.ConfirmarPedidoGrupal;
 import com.grouporder.application.usecase.EntregarPedidoGrupal;
 import com.grouporder.domain.model.EstadoPedido;
 import com.grouporder.domain.model.PedidoGrupal;
+import com.grouporder.infrastructure.web.CrearPedidoRequest;
+import com.grouporder.infrastructure.web.PedidoGrupalController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -60,6 +64,20 @@ class GrouporderApplicationTests {
 
 		assertThrows(IllegalStateException.class,
 				() -> new ConfirmarPedidoGrupal().ejecutar(pedido));
+	}
+
+	@Test
+	void creaYActualizaUnPedidoMedianteLaApi() {
+		PedidoGrupalController controller = new PedidoGrupalController();
+
+		ResponseEntity<PedidoGrupal> respuesta = controller.crear(
+				new CrearPedidoRequest(4L, "PED-004", "Carla")
+		);
+		controller.cerrar(4L);
+		controller.confirmar(4L);
+
+		assertEquals(HttpStatus.CREATED, respuesta.getStatusCode());
+		assertEquals(EstadoPedido.CONFIRMADO, controller.obtener(4L).getEstado());
 	}
 
 }
