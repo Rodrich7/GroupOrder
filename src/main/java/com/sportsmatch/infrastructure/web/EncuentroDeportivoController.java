@@ -1,11 +1,13 @@
-package com.grouporder.infrastructure.web;
+package com.sportsmatch.infrastructure.web;
 
-import com.grouporder.application.usecase.CancelarPedidoGrupal;
-import com.grouporder.application.usecase.CerrarPedidoGrupal;
-import com.grouporder.application.usecase.ConfirmarPedidoGrupal;
-import com.grouporder.application.usecase.CrearPedidoGrupal;
-import com.grouporder.application.usecase.EntregarPedidoGrupal;
-import com.grouporder.domain.model.PedidoGrupal;
+import com.sportsmatch.application.usecase.AbrirInscripciones;
+import com.sportsmatch.application.usecase.CancelarEncuentro;
+import com.sportsmatch.application.usecase.CerrarInscripciones;
+import com.sportsmatch.application.usecase.ConfirmarEncuentro;
+import com.sportsmatch.application.usecase.CrearEncuentroDeportivo;
+import com.sportsmatch.application.usecase.FinalizarEncuentro;
+import com.sportsmatch.application.usecase.IniciarEncuentro;
+import com.sportsmatch.domain.model.EncuentroDeportivo;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -22,52 +24,65 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 @RestController
-@RequestMapping("/api/pedidos")
-public class PedidoGrupalController {
+@RequestMapping("/api/encuentros")
+public class EncuentroDeportivoController {
 
-    private final Map<Long, PedidoGrupal> pedidos = new ConcurrentHashMap<>();
-    private final CrearPedidoGrupal crearPedidoGrupal = new CrearPedidoGrupal();
-    private final CerrarPedidoGrupal cerrarPedidoGrupal = new CerrarPedidoGrupal();
-    private final ConfirmarPedidoGrupal confirmarPedidoGrupal = new ConfirmarPedidoGrupal();
-    private final CancelarPedidoGrupal cancelarPedidoGrupal = new CancelarPedidoGrupal();
-    private final EntregarPedidoGrupal entregarPedidoGrupal = new EntregarPedidoGrupal();
+    private final Map<Long, EncuentroDeportivo> encuentros = new ConcurrentHashMap<>();
+    private final CrearEncuentroDeportivo crearEncuentroDeportivo = new CrearEncuentroDeportivo();
+    private final AbrirInscripciones abrirInscripciones = new AbrirInscripciones();
+    private final CerrarInscripciones cerrarInscripciones = new CerrarInscripciones();
+    private final ConfirmarEncuentro confirmarEncuentro = new ConfirmarEncuentro();
+    private final IniciarEncuentro iniciarEncuentro = new IniciarEncuentro();
+    private final FinalizarEncuentro finalizarEncuentro = new FinalizarEncuentro();
+    private final CancelarEncuentro cancelarEncuentro = new CancelarEncuentro();
 
     @PostMapping
-    public ResponseEntity<PedidoGrupal> crear(@RequestBody CrearPedidoRequest solicitud) {
-        PedidoGrupal pedido = crearPedidoGrupal.ejecutar(
-                solicitud.id(), solicitud.codigo(), solicitud.creador()
+    public ResponseEntity<EncuentroDeportivo> crear(@RequestBody CrearEncuentroRequest solicitud) {
+        EncuentroDeportivo encuentro = crearEncuentroDeportivo.ejecutar(
+                solicitud.id(), solicitud.deporte(), solicitud.fechaHora(), solicitud.cancha(),
+                solicitud.cupoMinimo(), solicitud.cupoMaximo(), solicitud.organizador()
         );
 
-        if (pedidos.putIfAbsent(pedido.getId(), pedido) != null) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe un pedido con ese id");
+        if (encuentros.putIfAbsent(encuentro.getId(), encuentro) != null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe un encuentro con ese id");
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(pedido);
+        return ResponseEntity.status(HttpStatus.CREATED).body(encuentro);
     }
 
     @GetMapping("/{id}")
-    public PedidoGrupal obtener(@PathVariable Long id) {
-        return buscarPedido(id);
+    public EncuentroDeportivo obtener(@PathVariable Long id) {
+        return buscarEncuentro(id);
     }
 
-    @PostMapping("/{id}/cerrar")
-    public PedidoGrupal cerrar(@PathVariable Long id) {
-        return actualizar(id, cerrarPedidoGrupal::ejecutar);
+    @PostMapping("/{id}/abrir-inscripciones")
+    public EncuentroDeportivo abrirInscripciones(@PathVariable Long id) {
+        return actualizar(id, abrirInscripciones::ejecutar);
+    }
+
+    @PostMapping("/{id}/cerrar-inscripciones")
+    public EncuentroDeportivo cerrarInscripciones(@PathVariable Long id) {
+        return actualizar(id, cerrarInscripciones::ejecutar);
     }
 
     @PostMapping("/{id}/confirmar")
-    public PedidoGrupal confirmar(@PathVariable Long id) {
-        return actualizar(id, confirmarPedidoGrupal::ejecutar);
+    public EncuentroDeportivo confirmar(@PathVariable Long id) {
+        return actualizar(id, confirmarEncuentro::ejecutar);
+    }
+
+    @PostMapping("/{id}/iniciar")
+    public EncuentroDeportivo iniciar(@PathVariable Long id) {
+        return actualizar(id, iniciarEncuentro::ejecutar);
+    }
+
+    @PostMapping("/{id}/finalizar")
+    public EncuentroDeportivo finalizar(@PathVariable Long id) {
+        return actualizar(id, finalizarEncuentro::ejecutar);
     }
 
     @PostMapping("/{id}/cancelar")
-    public PedidoGrupal cancelar(@PathVariable Long id) {
-        return actualizar(id, cancelarPedidoGrupal::ejecutar);
-    }
-
-    @PostMapping("/{id}/entregar")
-    public PedidoGrupal entregar(@PathVariable Long id) {
-        return actualizar(id, entregarPedidoGrupal::ejecutar);
+    public EncuentroDeportivo cancelar(@PathVariable Long id) {
+        return actualizar(id, cancelarEncuentro::ejecutar);
     }
 
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
@@ -75,17 +90,17 @@ public class PedidoGrupalController {
         return ResponseEntity.badRequest().body(Map.of("error", exception.getMessage()));
     }
 
-    private PedidoGrupal actualizar(Long id, Consumer<PedidoGrupal> accion) {
-        PedidoGrupal pedido = buscarPedido(id);
-        accion.accept(pedido);
-        return pedido;
+    private EncuentroDeportivo actualizar(Long id, Consumer<EncuentroDeportivo> accion) {
+        EncuentroDeportivo encuentro = buscarEncuentro(id);
+        accion.accept(encuentro);
+        return encuentro;
     }
 
-    private PedidoGrupal buscarPedido(Long id) {
-        PedidoGrupal pedido = pedidos.get(id);
-        if (pedido == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Pedido no encontrado");
+    private EncuentroDeportivo buscarEncuentro(Long id) {
+        EncuentroDeportivo encuentro = encuentros.get(id);
+        if (encuentro == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Encuentro no encontrado");
         }
-        return pedido;
+        return encuentro;
     }
 }

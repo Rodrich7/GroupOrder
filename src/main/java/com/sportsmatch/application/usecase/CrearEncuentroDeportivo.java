@@ -1,10 +1,13 @@
-package com.grouporder.application.usecase;
+package com.sportsmatch.application.usecase;
 
-import com.grouporder.domain.model.PedidoGrupal;
+import com.sportsmatch.domain.model.EncuentroDeportivo;
 
-public class CrearPedidoGrupal {
+import java.time.LocalDateTime;
 
-    public PedidoGrupal ejecutar(Long id, String codigo, String creador) {
-        return new PedidoGrupal(id, codigo, creador);
+public class CrearEncuentroDeportivo {
+
+    public EncuentroDeportivo ejecutar(Long id, String deporte, LocalDateTime fechaHora, String cancha,
+                                       int cupoMinimo, int cupoMaximo, String organizador) {
+        return new EncuentroDeportivo(id, deporte, fechaHora, cancha, cupoMinimo, cupoMaximo, organizador);
     }
 }

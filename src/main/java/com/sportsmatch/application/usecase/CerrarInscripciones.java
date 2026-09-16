@@ -1,10 +1,10 @@
-package com.grouporder.application.usecase;
+package com.sportsmatch.application.usecase;
 
-import com.grouporder.domain.model.PedidoGrupal;
+import com.sportsmatch.domain.model.EncuentroDeportivo;
 
-public class CerrarPedidoGrupal {
+public class CerrarInscripciones {
 
-    public void ejecutar(PedidoGrupal pedido) {
-        pedido.cerrar();
+    public void ejecutar(EncuentroDeportivo encuentro) {
+        encuentro.cerrarInscripciones();
     }
 }

@@ -1,11 +1,12 @@
-package com.grouporder.domain.model;
+package com.sportsmatch.domain.model;
 
-public enum EstadoPedido {
+public enum EstadoEncuentro {
 
+    BORRADOR,
     ABIERTO,
     CERRADO,
     CONFIRMADO,
-    ENTREGADO,
+    EN_JUEGO,
+    FINALIZADO,
     CANCELADO
-
 }
