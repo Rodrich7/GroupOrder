@@ -1,14 +1,13 @@
-package com.grouporder;
+package com.sportsmatch;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class
-GrouporderApplication {
+public class SportsMatchApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(GrouporderApplication.class, args);
+		SpringApplication.run(SportsMatchApplication.class, args);
 	}
 
 }

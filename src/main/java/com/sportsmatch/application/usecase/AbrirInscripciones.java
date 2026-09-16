@@ -2,9 +2,9 @@ package com.sportsmatch.application.usecase;
 
 import com.sportsmatch.domain.model.EncuentroDeportivo;
 
-public class ConfirmarEncuentro {
+public class AbrirInscripciones {
 
     public void ejecutar(EncuentroDeportivo encuentro) {
-        encuentro.confirmar();
+        encuentro.abrirInscripciones();
     }
 }
